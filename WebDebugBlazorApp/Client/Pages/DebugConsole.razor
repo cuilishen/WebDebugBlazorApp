@@ -15,26 +15,26 @@
         overflow-y: auto;
         -webkit-user-modify: read-write-plaintext-only;
     }
-
-    [contentEditable=true]:empty:not(:focus):before {
-        content: attr(data-text);
-    }
 </style>
-@*<h1>Counter</h1>*@
-@*<h1>@source</h1>*@
-@*<h6>输出</h6>*@
-<textarea id="textarea" onpropertychange="scrollTop = scrollHeight" οnfοcus="this.scrollTop = this.scrollHeight ">
-@source
+//采用下面的绑定方式，是双向绑定
+<textarea id="textarea" @bind="Source"  onpropertychange="scrollTop = scrollHeight" οnfοcus="this.scrollTop = this.scrollHeight ">
 </textarea>
 
-
-<button class="btn btn-primary" @onclick="IncrementCount">滚动到底部</button>
-
+<button class="btn btn-primary" @onclick="ScrollToBottom">滚动到底部</button>
+<button class="btn btn-primary" @onclick="ClearConsole">清空控制台</button>
 
 @code {
     private HubConnection hubConnection;
     private List<string> messages = new List<string>();
-    public string source;
+    private string source;
+
+    public string Source
+    {
+        get { return source; }
+        set { source = value; }
+    }
+
+    //public string source;
     public string userInput;
     private string messageInput;
 
@@ -59,10 +59,11 @@
             }
             foreach (var item in messages)
             {
-                source += item + "\r\n";
+                Source += item + "\r\n";
             }
 
             //JS.InvokeVoidAsync("convertArray");
+            //await JS.InvokeVoidAsync("writeStrToControl", Source,"textarea");
             StateHasChanged();
             await JS.InvokeVoidAsync("scrollToBottom");
         });
@@ -102,7 +103,7 @@
             105, 118, 101, 114, 115, 101, 10, 10,
         };
 
-    private async void IncrementCount()
+    private async void ScrollToBottom()
     {
         //await JS.InvokeVoidAsync("convertArray");
 
@@ -113,5 +114,12 @@
         await JS.InvokeVoidAsync("scrollToBottom");
 
         currentCount++;
+    }
+    private async void ClearConsole()
+    {
+        messages.Clear();
+        Source = string.Empty;
+        //await JS.InvokeVoidAsync("writeStrToControl", Source, "textarea");
+        StateHasChanged();
     }
 }

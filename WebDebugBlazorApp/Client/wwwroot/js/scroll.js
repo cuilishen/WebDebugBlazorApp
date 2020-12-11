@@ -13,3 +13,11 @@ window.scrollToBottom = () => {
     //i++;
     obj.scrollTop = obj.scrollHeight; // good
 };
+
+window.writeStrToControl = (str, controlName) => {
+    var obj = document.getElementById(controlName);
+    //obj.value += i + "\n";
+    //i++;
+    obj.value = str;
+    obj.scrollTop = obj.scrollHeight; // good
+};
