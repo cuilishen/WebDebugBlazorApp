@@ -1,4 +1,4 @@
-﻿@page "/counter"
+﻿@page "/"
 
 @using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavigationManager
@@ -22,13 +22,13 @@
 </style>
 @*<h1>Counter</h1>*@
 @*<h1>@source</h1>*@
-<h2>输出</h2>
+@*<h6>输出</h6>*@
 <textarea id="textarea" onpropertychange="scrollTop = scrollHeight" οnfοcus="this.scrollTop = this.scrollHeight ">
 @source
 </textarea>
 
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCount">滚动到底部</button>
 
 
 @code {
