@@ -1,0 +1,117 @@
+﻿@page "/counter"
+
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS;
+<style>
+    #textarea {
+        width: 100%;
+        height: 100px;
+        min-height: 520px;
+        outline: 0;
+        border: 1px solid #397EFF;
+        font-size: 13px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-user-modify: read-write-plaintext-only;
+    }
+
+    [contentEditable=true]:empty:not(:focus):before {
+        content: attr(data-text);
+    }
+</style>
+@*<h1>Counter</h1>*@
+@*<h1>@source</h1>*@
+<h2>输出</h2>
+<textarea id="textarea" onpropertychange="scrollTop = scrollHeight" οnfοcus="this.scrollTop = this.scrollHeight ">
+@source
+</textarea>
+
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+
+@code {
+    private HubConnection hubConnection;
+    private List<string> messages = new List<string>();
+    public string source;
+    public string userInput;
+    private string messageInput;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/webdebughub"))
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage",async (name, msg) =>
+        {
+            Console.WriteLine($"{name}:{msg}");
+            userInput = msg;
+            //source = name;
+
+            messages.Add(msg);
+            if (messages.Count > 50)
+            {
+                messages.RemoveAt(0);
+            }
+            foreach (var item in messages)
+            {
+                source += item + "\r\n";
+            }
+
+            //JS.InvokeVoidAsync("convertArray");
+            StateHasChanged();
+            await JS.InvokeVoidAsync("scrollToBottom");
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    Task Send() =>
+        hubConnection.SendAsync("SendMessage", "客户端发送到服务端的消息userInput");
+
+    public bool IsConnected =>
+        hubConnection.State == HubConnectionState.Connected;
+
+    public void Dispose()
+    {
+        _ = hubConnection.DisposeAsync();
+    }
+
+    //private void IncrementCount()
+    //{
+    //    currentCount++;
+    //    imgPath = paths.Last();
+    //    imgPath = "images/a97954df-e46d-409a-b5d5-8f4ac20240db_awesomeface.png";
+    //}
+}
+
+
+
+@code {
+    private int currentCount = 0;
+
+    private uint[] quoteArray = new uint[]
+        {
+            60, 101, 109, 62, 67, 97, 110, 39, 116, 32, 115, 116, 111, 112, 32,
+            116, 104, 101, 32, 115, 105, 103, 110, 97, 108, 44, 32, 77, 97,
+            108, 46, 60, 47, 101, 109, 62, 32, 45, 32, 77, 114, 46, 32, 85, 110,
+            105, 118, 101, 114, 115, 101, 10, 10,
+        };
+
+    private async void IncrementCount()
+    {
+        //await JS.InvokeVoidAsync("convertArray");
+
+        //var text =
+        //   await JS.InvokeAsync<string>("convertArray", quoteArray);
+        //source = text;
+
+        await JS.InvokeVoidAsync("scrollToBottom");
+
+        currentCount++;
+    }
+}
